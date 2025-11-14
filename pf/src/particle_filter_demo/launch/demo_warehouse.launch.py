@@ -38,11 +38,11 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     # Add arguments to LaunchDescription
-    ld.add_action(DeclareLaunchArgument('headless', default_value='False',
+    ld.add_action(DeclareLaunchArgument('headless', default_value='True',
                                         description='Run in headless mode'))
     ld.add_action(DeclareLaunchArgument('do_fake_localization', default_value='False',
                                         description='Publish fake identity tf "map" -> "odom"'))
-    ld.add_action(DeclareLaunchArgument('publish_tf_odom2baselink', default_value='True',
+    ld.add_action(DeclareLaunchArgument('publish_tf_odom2baselink', default_value='False',
                                         description='Publish tf "odom" -> "base_link"'))
     ld.add_action(DeclareLaunchArgument('force_publish_vehicle_namespace', default_value='False',
                                         description='Use vehicle name namespace even if there is only one vehicle'))
@@ -52,8 +52,7 @@ def generate_launch_description():
     # Include the original launch file
     ld.add_action(IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('mvsim'),
-                         'launch', 'launch_world.launch.py')
+            get_share_file_path_from_package(package_name="mvsim", file_name="launch_world.launch.py")
         ),
         launch_arguments={
             'world_file': world_file,
@@ -73,6 +72,14 @@ def generate_launch_description():
         prefix="xterm -e"
     )
     ld.add_action(keyboard_control)
+
+
+    odom_sim =  Node(
+        package="odom_simulator",
+        executable="odom_node",
+        prefix="xterm -hold -e"
+    )
+    ld.add_action(odom_sim)
 
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
